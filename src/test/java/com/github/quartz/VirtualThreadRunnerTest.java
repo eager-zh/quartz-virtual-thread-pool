@@ -28,7 +28,7 @@ public class VirtualThreadRunnerTest {
 	
 	@Test
 	public void testTenaciousSubmitters() throws SchedulerConfigException, InterruptedException {
-		final CountDownLatch mutex = new CountDownLatch(1);
+		final CountDownLatch shutdownLatch = new CountDownLatch(1);
 		
 		final VirtualThreadRunner pool = new VirtualThreadRunner();
 		pool.setThreadCount(POOL_THREAD_COUNT);
@@ -45,7 +45,7 @@ public class VirtualThreadRunnerTest {
 			}
 			sleep(randomizer.nextInt(MAX_SLEEP));
 			if (executedJobCount.incrementAndGet() == THREAD_COUNT) {
-				mutex.countDown();
+				shutdownLatch.countDown();
 			}
 		};
 		
@@ -58,7 +58,7 @@ public class VirtualThreadRunnerTest {
 			}
 		}));
 		
-		Assert.assertTrue("Test hangs", mutex.await(THREAD_COUNT*MAX_SLEEP, TimeUnit.SECONDS));
+		Assert.assertTrue("Test hangs", shutdownLatch.await(THREAD_COUNT*MAX_SLEEP, TimeUnit.SECONDS));
 		final Thread shutdowner = Thread.ofPlatform().start(() -> {
 			pool.shutdown(true);
 		});
@@ -71,7 +71,7 @@ public class VirtualThreadRunnerTest {
 	
 	@Test
 	public void testWaivingSubmitters() throws SchedulerConfigException, InterruptedException {
-		final CountDownLatch mutex = new CountDownLatch(1);
+		final CountDownLatch shutdownLatch = new CountDownLatch(1);
 		
 		final VirtualThreadRunner pool = new VirtualThreadRunner();
 		pool.setThreadCount(POOL_THREAD_COUNT);
@@ -98,11 +98,11 @@ public class VirtualThreadRunnerTest {
 				rejectedJobCount.incrementAndGet();
 			} 
 			if (attemptedThreadCount.incrementAndGet() == THREAD_COUNT) {
-				mutex.countDown();
+				shutdownLatch.countDown();
 			}
 		}));
 
-		Assert.assertTrue("Test hangs", mutex.await(THREAD_COUNT*MAX_SLEEP, TimeUnit.SECONDS));
+		Assert.assertTrue("Test hangs", shutdownLatch.await(THREAD_COUNT*MAX_SLEEP, TimeUnit.SECONDS));
 		final Thread shutdowner = Thread.ofPlatform().start(() -> {
 			pool.shutdown(true);
 		});
@@ -115,7 +115,7 @@ public class VirtualThreadRunnerTest {
 
 	@Test
 	public void testThreadFactory() throws SchedulerConfigException, InterruptedException {
-		final CountDownLatch mutex = new CountDownLatch(1);
+		final CountDownLatch shutdownLatch = new CountDownLatch(1);
 		
 		final String threadPrefix = "custom-thread-name-";
 		
@@ -141,7 +141,7 @@ public class VirtualThreadRunnerTest {
 				wrongThreadName.set(true);
 			}
 			if (executedJobCount.incrementAndGet() == THREAD_COUNT) {
-				mutex.countDown();
+				shutdownLatch.countDown();
 			}
 		};
 		
@@ -155,7 +155,7 @@ public class VirtualThreadRunnerTest {
 		}));
 		
 
-		Assert.assertTrue("Test hangs", mutex.await(THREAD_COUNT*MAX_SLEEP, TimeUnit.SECONDS));
+		Assert.assertTrue("Test hangs", shutdownLatch.await(THREAD_COUNT*MAX_SLEEP, TimeUnit.SECONDS));
 		final Thread shutdowner = Thread.ofPlatform().start(() -> {
 			pool.shutdown(true);
 		});
@@ -169,7 +169,7 @@ public class VirtualThreadRunnerTest {
 	
 	@Test
 	public void testVirtualSubmitterThreads() throws SchedulerConfigException, InterruptedException {
-		final CountDownLatch mutex = new CountDownLatch(1);
+		final CountDownLatch shutdownLatch = new CountDownLatch(1);
 		
 		final VirtualThreadRunner pool = new VirtualThreadRunner();
 		pool.setThreadCount(POOL_THREAD_COUNT);
@@ -186,7 +186,7 @@ public class VirtualThreadRunnerTest {
 			}
 			sleep(randomizer.nextInt(MAX_SLEEP));
 			if (executedJobCount.incrementAndGet() == THREAD_COUNT) {
-				mutex.countDown();
+				shutdownLatch.countDown();
 			}
 		};
 		
@@ -199,7 +199,7 @@ public class VirtualThreadRunnerTest {
 			}
 		}));
 		
-		Assert.assertTrue("Test hangs", mutex.await(THREAD_COUNT*MAX_SLEEP, TimeUnit.SECONDS));
+		Assert.assertTrue("Test hangs", shutdownLatch.await(THREAD_COUNT*MAX_SLEEP, TimeUnit.SECONDS));
 		final Thread shutdowner = Thread.ofPlatform().start(() -> {
 			pool.shutdown(true);
 		});
@@ -212,7 +212,7 @@ public class VirtualThreadRunnerTest {
 	
 	@Test
 	public void testShutdown() throws SchedulerConfigException, InterruptedException {
-		final CountDownLatch mutex = new CountDownLatch(1);
+		final CountDownLatch shutdownLatch = new CountDownLatch(1);
 		
 		final VirtualThreadRunner pool = new VirtualThreadRunner();
 		pool.setThreadCount(POOL_THREAD_COUNT);
@@ -224,7 +224,7 @@ public class VirtualThreadRunnerTest {
 		
 		final Runnable job = () -> {
 			if (executingJobCount.incrementAndGet() == POOL_THREAD_COUNT) {
-				mutex.countDown();
+				shutdownLatch.countDown();
 			}
 			sleep(MAX_SLEEP);
 			executedJobCount.incrementAndGet();
@@ -239,7 +239,7 @@ public class VirtualThreadRunnerTest {
 			}
 		}));
 		
-		Assert.assertTrue("Test hangs", mutex.await(THREAD_COUNT*MAX_SLEEP, TimeUnit.SECONDS));
+		Assert.assertTrue("Test hangs", shutdownLatch.await(THREAD_COUNT*MAX_SLEEP, TimeUnit.SECONDS));
 		final Thread shutdowner = Thread.ofPlatform().start(() -> {
 			pool.shutdown(true);
 		});
